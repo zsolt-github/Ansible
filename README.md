@@ -10,9 +10,10 @@ This GitHub repo contains basic Terraform building blocks for the Azure cloud.
 | Name | Version |
 |------|---------|
 | azure | ~>3.0 |
+| aws | ~>4.0 |
 | random | ~>3.0 |
 | tls | ~>4.0 |
-| null | ~>3.0 |
+| cloudflare | ~>4.0 |
 
 
 ### Deployment Instructions
