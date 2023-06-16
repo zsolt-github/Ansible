@@ -66,6 +66,18 @@ variable "vm-subnet_id" {
 
 # --- Variables for Azure Virtual Machine(s) -------------------------
 
+variable "vm-webserver_name" {
+    type        = string
+    description = "Name of the webserver."
+}
+
+variable "vm-webserver" {
+    type        = map(any)
+    description = "Webserver Linux VM."
+}
+
+
+/*
 variable "vm-virtual_machine_1_name" {
     type        = string
     description = "Name of Virtual Machine 1."
@@ -131,8 +143,6 @@ variable "vm-virtual_machine_1_plan_publisher" {
     type        = string
     description = "Azure Marketplace VM Plan Publisher"
 }
-*/
-
 
 variable "vm-virtual_machine_1_public_key" {
     #type        = string
@@ -143,7 +153,7 @@ variable "vm-virtual_machine_1_boot_diagnostic_uri" {
     #type        = string
     description = "Azure storage account primary blob endpoint for Linux VM boot diagnostics."
 }
-
+*/
 
 
 

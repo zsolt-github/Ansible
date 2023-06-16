@@ -100,14 +100,86 @@ resource "azurerm_network_interface" "azure-net_int-1" {
   }
 }
 
-
+/*
 resource "azurerm_marketplace_agreement" "azure_marketplace-ubuntu" {
+  for_each  = var.vm-webserver
   publisher = var.vm-virtual_machine_1_source_image_publisher
   offer     = var.vm-virtual_machine_1_source_image_offer
   plan      = var.vm-virtual_machine_1_source_image_sku
 }
+*/
+
+resource "azurerm_marketplace_agreement" "azure_marketplace-ubuntu" {
+  for_each  = var.vm-webserver
+  publisher = each.value["image_publisher"]
+  offer     = each.value["image_offer"]
+  plan      = each.value["image_sku"]
+}
+
+resource "azurerm_linux_virtual_machine" "azure-linux_virtual_machine-1" {
+  name                            = var.vm-webserver_name
+  for_each                        = var.vm-webserver
+  resource_group_name             = var.vm-resource_group_name
+  location                        = var.vm-location
+  size                            = each.value["size"]
+  depends_on                      = [azurerm_marketplace_agreement.azure_marketplace-ubuntu, azurerm_network_interface.azure-net_int-1]
+    
+  network_interface_ids           = [azurerm_network_interface.azure-net_int-1.id]
+  computer_name                   = each.value["computer_name"]
+  admin_username                  = each.value["admin_username"]
+  admin_password                  = each.value["admin_password"]
+  disable_password_authentication = each.value["disable_password_authentication"]
+
+  os_disk {
+    name                          = each.value["os_disk_name"]
+    caching                       = each.value["os_disk_caching"]
+    storage_account_type          = each.value["storage_account_type"]
+  }
+
+  source_image_reference {
+    publisher                     = each.value["publisher"]
+    offer                         = each.value["offer"]
+    sku                           = each.value["sku"]
+    version                       = each.value["version"]
+  }
 
 
+# Note: non-Microsoft images require the plan block,
+#       whereas Microsoft Published images do not require a plan block.
+#       If the 'plan' block is present it causes the following error:
+#
+#          Message="User failed validation to purchase resources.
+#                   Error message: 'Offer with PublisherId: 'canonical', OfferId: '0001-com-ubuntu-server-lunar' cannot be purchased due to validation errors.
+#                   For more information see details. Correlation Id: '...' The Offer: '0001-com-ubuntu-server-lunar' cannot be purchased by subscription: '...'
+#                   as it is not to be sold in market: 'GB'. Please choose a subscription which is associated with a different market. 
+
+  #plan {
+  #  name                       = each.value["sku"]
+  #  product                    = each.value["offer"]
+  #  publisher                  = each.value["publisher"]
+  #}
+
+  admin_ssh_key {
+    username                    = var.vm-virtual_machine_1_admin_user_name
+    public_key                  = file(each.value["public_key"])
+  }
+
+  boot_diagnostics {
+    storage_account_uri         = var.vm-virtual_machine_1_boot_diagnostic_uri
+  }
+
+  identity {
+    type                        = "SystemAssigned"
+  }
+
+  tags = {
+    "ResourceType"              = "Virtual Machine"
+    "Environment"               = var.vm-tag_environment
+  }
+}
+
+
+/*
 resource "azurerm_linux_virtual_machine" "azure-linux_virtual_machine-1" {
   name                = var.vm-virtual_machine_1_name
   resource_group_name = var.vm-resource_group_name
@@ -168,3 +240,4 @@ resource "azurerm_linux_virtual_machine" "azure-linux_virtual_machine-1" {
     "Environment"  = var.vm-tag_environment
   }
 }
+*/
