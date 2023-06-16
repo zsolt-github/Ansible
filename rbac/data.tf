@@ -1,6 +1,6 @@
 # Terraform management group
 data "azurerm_management_group" "mgt-terraform" {
-  name = "Terraform"
+  name = var.rbac_terraform_mgt_group_name
 }
 
 /*
@@ -11,7 +11,7 @@ data "azurerm_subscription" "current" {
 
 # Terraform subscription
 data "azurerm_subscription" "sub-terraform" {
-    subscription_id = "5d0102be-6046-4e6b-97c9-92838eb3ca1b"
+    subscription_id = var.rbac_terraform_sub_id
 }
 
 /*
@@ -27,19 +27,10 @@ data "azuread_user" "rbac-users" {
   user_principal_name = format("%s", each.key)
 }
 
-# Terraform Azure AD user
-data "azuread_user" "ad_user-terraform" {
-  user_principal_name = "ZF.Terraform@zfcloudoutlook.onmicrosoft.com"
-}
-
-# Service principal for Terraform
-data "azuread_service_principal" "sp-terraform" {
-  display_name = "Terraform-API-Access"
-}
-
 # Security group sg-storage-modify
-data "azuread_group" "sg-storage-modify" {
-  display_name = "sg-storage-modify"
+data "azuread_group" "sg-storage-rw" {
+  for_each         = toset(var.rbac_groups)
+  display_name     = format("%s", each.key)
   security_enabled = true
 }
 
