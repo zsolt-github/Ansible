@@ -39,37 +39,6 @@ resource "azurerm_subnet" "azure-subnets" {
   address_prefixes     = each.value["address_prefix"]
 }
 
-/* ---
-resource "azurerm_public_ip" "azure-bastion_pub_ip" {
-  name                = var.bi-bastion_public_ip_name
-  location            = azurerm_resource_group.azure-rg.location
-  resource_group_name = azurerm_resource_group.azure-rg.name
-  allocation_method   = var.bi-bastion_public_ip_type
-  sku                 = var.bi-bastion_public_ip_sku
-  
-  tags = {
-    "ResourceType" = "Public IP"
-    "Environment"  = var.bi-tag_environment
-  }
-}
-
-resource "azurerm_bastion_host" "bastion" {
-  name                = var.bi-bastion_host_name
-  location            = azurerm_resource_group.azure-rg.location
-  resource_group_name = azurerm_resource_group.azure-rg.name
-  
-  ip_configuration {
-    name                 = "bastion_config"
-    subnet_id            = azurerm_subnet.azure-subnets["bastion_subnet"].id
-    public_ip_address_id = azurerm_public_ip.azure-bastion_pub_ip.id
-  }
-
-  tags = {
-    "ResourceType" = "Bastion Host"
-    "Environment"  = var.bi-tag_environment
-  }
-}
-*/ #---
 
 resource "azurerm_storage_account" "storage_accounts" {
   for_each                        = var.bi-storage_accounts
@@ -136,4 +105,35 @@ resource "azurerm_key_vault_access_policy" "azure-key_vault_access_poicy-1" {
 }
 */ # ---
 
+/* ---
+resource "azurerm_public_ip" "azure-bastion_pub_ip" {
+  name                = var.bi-bastion_public_ip_name
+  location            = azurerm_resource_group.azure-rg.location
+  resource_group_name = azurerm_resource_group.azure-rg.name
+  allocation_method   = var.bi-bastion_public_ip_type
+  sku                 = var.bi-bastion_public_ip_sku
+  
+  tags = {
+    "ResourceType" = "Public IP"
+    "Environment"  = var.bi-tag_environment
+  }
+}
+
+resource "azurerm_bastion_host" "bastion" {
+  name                = var.bi-bastion_host_name
+  location            = azurerm_resource_group.azure-rg.location
+  resource_group_name = azurerm_resource_group.azure-rg.name
+  
+  ip_configuration {
+    name                 = "bastion_config"
+    subnet_id            = azurerm_subnet.azure-subnets["bastion_subnet"].id
+    public_ip_address_id = azurerm_public_ip.azure-bastion_pub_ip.id
+  }
+
+  tags = {
+    "ResourceType" = "Bastion Host"
+    "Environment"  = var.bi-tag_environment
+  }
+}
+*/ #---
 

@@ -50,34 +50,6 @@ variable "bi-subnets" {
   type = map(any)
 }
 
-/* ---
-# Variables for the Bastion host public IP -------------------------
-
-variable "bi-bastion_public_ip_name" {
-    type        = string
-    description = "Name of the Bastion public IP."
-}
-
-variable "bi-bastion_public_ip_type" {
-    type        = string
-    description = "Type of the Bastion public IP."
-}
-
-variable "bi-bastion_public_ip_sku" {
-    type        = string
-    description = "SKU of Bastion public IP."
-}
-
-
-
-# Variables for the Azure Bastion Host -------------------------
-
-variable "bi-bastion_host_name" {
-  type        = string
-  description = "The name of the basion host"
-  #default     = "az-bastionhost"
-}
-*/ # ---
 
 
 # Variables for the Azure Storage Account(s) -------------------------
@@ -107,5 +79,35 @@ variable "bi-key_vault_sku" {
     type        = string
     description = "SKU of the Azure Key Vault. (strandard or premium)"
     default     = "strandard"
+}
+*/ # ---
+
+
+/* ---
+# Variables for the Bastion host public IP -------------------------
+
+variable "bi-bastion_public_ip_name" {
+    type        = string
+    description = "Name of the Bastion public IP."
+}
+
+variable "bi-bastion_public_ip_type" {
+    type        = string
+    description = "Type of the Bastion public IP."
+}
+
+variable "bi-bastion_public_ip_sku" {
+    type        = string
+    description = "SKU of Bastion public IP."
+}
+
+
+
+# Variables for the Azure Bastion Host -------------------------
+
+variable "bi-bastion_host_name" {
+  type        = string
+  description = "The name of the basion host"
+  #default     = "az-bastionhost"
 }
 */ # ---
