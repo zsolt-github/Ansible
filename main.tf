@@ -26,16 +26,6 @@ module "bi" {
 
   bi-subnets = var.subnets
 
-  /* ---
-  bi-bastion_public_ip_name = "Bastion-PUB_IP"
-  #bi-bastion_public_ip_name = "${var.bastion_host_name}-PUB_IP"
-  bi-bastion_public_ip_type = var.bastion_public_ip_type
-  bi-bastion_public_ip_sku  = var.bastion_public_ip_sku
-
-  bi-bastion_host_name = var.bastion_host_name
-  */ # ---
-
-  
   bi-storage_accounts = var.storage_accounts
 
   bi-storage_containers = var.storage_containers
@@ -49,15 +39,28 @@ module "bi" {
   #bi-key_vault_name = "${var.az_name}${random_id.random_id.dec}-KeyVault"
   bi-key_vault_sku  = var.key_vault_sku
   */ # ---
+
+  /* ---
+  bi-bastion_public_ip_name = "Bastion-PUB_IP"
+  #bi-bastion_public_ip_name = "${var.bastion_host_name}-PUB_IP"
+  bi-bastion_public_ip_type = var.bastion_public_ip_type
+  bi-bastion_public_ip_sku  = var.bastion_public_ip_sku
+
+  bi-bastion_host_name = var.bastion_host_name
+  */ # ---
 }
 
 
-/*
+
 # ---- Role Based Access Control module ----------------------------
 module "rbac" {
   source = "./rbac"
 
   depends_on  = [module.bi]
+
+  rbac_terraform_mgt_group_name = var.aad_terraform_mgt_group_name
+
+  rbac_terraform_sub_id = var.aad_terraform_sub_id
 
   rbac_users  = var.aad_users
   rbac_sps    = var.aad_sps
@@ -65,9 +68,9 @@ module "rbac" {
 
 
 }
-*/
 
-/*
+
+
 # ---- Virtual mahcine module ----------------------------
 module "vm" {
   source = "./vm"
@@ -89,6 +92,12 @@ module "vm" {
   vm-net_int-1 = "${local.name}-NET_INT1"
   vm-subnet_id = module.bi.subnet_1_id
 
+  vm-webserver_name = "${local.name}-VM"
+  vm-webserver      = var.webserver
+
+
+
+  /*
   vm-virtual_machine_1_name           = "${local.name}-VM"
   vm-virtual_machine_1_size                 = var.virtual_machine_1_size
   vm-virtual_machine_1_computer_name  = var.virtual_machine_1_computer_name
@@ -107,10 +116,10 @@ module "vm" {
 
   vm-virtual_machine_1_public_key               = var.virtual_machine_1_public_key
   vm-virtual_machine_1_boot_diagnostic_uri      = module.bi.storage_account_boot_diagnostic_uri
-
+  */
 }
 
-
+/*
 # =======================================================
 # ====      (D)NS, (S)SL, (C)ertificates module      ====
 # =======================================================
@@ -118,10 +127,10 @@ module "vm" {
 module "dsc" {
   source = "./dsc"
 
-  depends_on                = [module.vm]
+  depends_on                   = [module.vm]
 
-  dsc-storage_account_name        = module.bi.az-storage_account_name
-  dsc-container_1_name            = module.bi.az-container_1_name
+  dsc-storage_account_name     = module.bi.az-storage_account_name
+  dsc-container_1_name         = module.bi.az-container_1_name
 
   dsc-cloudflare_zone_id       = var.cf-zone_id
   dsc-cloudflare_a_record_name = var.cf-a_record_name
@@ -130,5 +139,5 @@ module "dsc" {
   dsc-acme_email_address       = var.acme_email_address
 
 }
-*/
 
+*/

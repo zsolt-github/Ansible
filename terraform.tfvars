@@ -46,18 +46,6 @@ subnets = {
 }
 
 
-/* ---
-# --- Variables for the Bastion host public IP -------------------------
-
-bastion_public_ip_type = "Static"
-bastion_public_ip_sku  = "Standard"
-
-
-
-# --- Variables for the Azure Bastion Host -------------------------
-
-bastion_host_name = "Bastion_Host"
-*/ # ---
 
 # --- Azure Storage account variables -------------------------
 storage_accounts = {
@@ -111,15 +99,32 @@ key_vault_sku = "standard"
 */ # ---
 
 
+/* ---
+# --- Variables for the Bastion host public IP -------------------------
+
+bastion_public_ip_type = "Static"
+bastion_public_ip_sku  = "Standard"
+
+
+
+# --- Variables for the Azure Bastion Host -------------------------
+
+bastion_host_name = "Bastion_Host"
+*/ # ---
+
 
 
 # ===========================================================
 # =========      VARIABLES for the RBAC MODULE      =========
 # ===========================================================
 
+aad_terraform_mgt_group_name = "Terraform"
+
+aad_terraform_sub_id = "5d0102be-6046-4e6b-97c9-92838eb3ca1b"
+
 aad_users = [
-  "ZF.Terraform@zfcloudoutlook.onmicrosoft.com",
-  "Test1@zfcloudoutlook.onmicrosoft.com"
+  "Test1@zfcloudoutlook.onmicrosoft.com",
+  "Test2@zfcloudoutlook.onmicrosoft.com"
 ]
 
 aad_sps = [
@@ -127,7 +132,7 @@ aad_sps = [
 ]
 
 aad_groups = [
-  "sg-storage-modify",
+  "sg-storage-rw",
 ]
 
 
@@ -138,7 +143,7 @@ aad_groups = [
 # --- Azure Network Security Group variables -------------------------
 
 
-/*
+
 # --- Azure Public IP variables -------------------------
 public_ip_1_type = "Dynamic"
 public_ip_1_sku  = "Basic"
@@ -150,7 +155,30 @@ public_ip_1_sku  = "Basic"
 
 
 # --- Azure Virtual Machines variable -------------------------
-virtual_machine_1_computer_name  = "Ansible-TF"
+vm-webserver = {
+  webserver-1 = {
+    name                            = "webserver"
+    size                            = "Standard_B1s" # Standard_B1s / Standard_B2s
+    computer_name                   = "webserver"
+    admin_username                  = "adminuser"
+    admin_password                  = "AdminPassword-2022"
+    disable_password_authentication = "false"
+
+    os_disk_name                    = "OSDisk"
+    os_disk_caching                 = "ReadWrite"
+    storage_account_type            = "StandardSSD_LRS"
+
+    publisher                       = "canonical" # this is the Plan Publisher as well
+    offer                           = "0001-com-ubuntu-server-lunar" # this is the Plan Product as well
+    sku                             = "23_04" # this is the Plan Name as well
+    version                         = "latest"
+
+    public_key                      = "~/.ssh/az-webserver_ssh_key.pub"
+  }
+}
+
+/*
+virtual_machine_1_computer_name        = "Ansible-TF"
 virtual_machine_1_size                 = "Standard_B2s"
 virtual_machine_1_admin_user_name      = "adminuser"
 virtual_machine_1_admin_user_password  = "AdminPassword-2022"
@@ -167,7 +195,7 @@ virtual_machine_1_source_image_version   = "latest"
 #virtual_machine_1_plan_product           = "0001-com-ubuntu-server-lunar"
 #virtual_machine_1_plan_publisher         = "canonical"
 
-virtual_machine_1_public_key              =   "~/.ssh/az-webserver_ssh_key.pub"
+virtual_machine_1_public_key              = "~/.ssh/az-webserver_ssh_key.pub"
 
 
 # =============================================================================
@@ -182,5 +210,5 @@ cf-a_record_name = "webserver"
 
 # --- Let's Encrypt variables -------------------------
 acme_email_address = "myemail@mailbox.org"
-
 */
+
