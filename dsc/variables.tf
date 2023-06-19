@@ -6,6 +6,10 @@ variable "dsc-container_1_name" {
     description = "Container name."
 }
 
+variable "dsc-container_2_name" {
+    description = "Container name."
+}
+
 variable "dsc-cloudflare_zone_id" {
     description = "Cloudflare Zone ID."
 }

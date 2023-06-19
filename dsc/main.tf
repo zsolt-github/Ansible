@@ -19,22 +19,37 @@ resource "acme_certificate" "acme_certificate" {
   }
 }
 
-/*
-resource "azurerm_storage_blob" "blob-sample_file" {
-  name                   = "sample-file.sh"
+
+resource "azurerm_storage_blob" "blob-fileset-root" {
+  for_each = fileset("${path.root}/files_upload", "**") # ** = recursive
+
+  name                   = each.key
   storage_account_name   = var.dsc-storage_account_name
-  storage_container_name = var.dsc-container_1_name
+  storage_container_name = var.dsc-container_2_name
   type                   = "Block"
-  source                 = "~/Files/sample-file.sh"
+  content_md5            = filemd5("/files_upload/${each.key}")
+  source                 = "${path.root}/files_upload/${each.key}"
 }
-*/
+
+
+resource "azurerm_storage_blob" "blob-fileset-dsc_module" {
+  for_each = fileset("${path.module}/files_upload", "**") # ** = recursive
+
+  name                   = each.key
+  storage_account_name   = var.dsc-storage_account_name
+  storage_container_name = var.dsc-container_2_name
+  type                   = "Block"
+  content_md5            = filemd5("${path.module}/files_upload/${each.key}")
+  source                 = "${path.module}/files_upload/${each.key}"
+}
+
 
 resource "azurerm_storage_blob" "blob-acme_private_key" {
   name                   = "acme.key"
   storage_account_name   = var.dsc-storage_account_name
   storage_container_name = var.dsc-container_1_name
   type                   = "Block"
-  source                 = acme_certificate.acme_certificate.private_key_pem
+  source_content         = acme_certificate.acme_certificate.private_key_pem
 }
 
 resource "azurerm_storage_blob" "blob-acme_certificate" {
@@ -42,9 +57,10 @@ resource "azurerm_storage_blob" "blob-acme_certificate" {
   storage_account_name   = var.dsc-storage_account_name
   storage_container_name = var.dsc-container_1_name
   type                   = "Block"
-  source                 = acme_certificate.acme_certificate.certificate_pem
+  source_content         = acme_certificate.acme_certificate.certificate_pem
 }
 
+/*
 resource "null_resource" "public_ip_check" {
   
   provisioner "local-exec" {
@@ -52,7 +68,7 @@ resource "null_resource" "public_ip_check" {
     command = "echo ${var.dsc-cloudflare_public_ip}"
   }
 }
-
+*/
 
 resource "cloudflare_record" "webserver_host" {
   zone_id = var.dsc-cloudflare_zone_id
