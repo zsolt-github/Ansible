@@ -1,4 +1,8 @@
-resource "azurerm_network_security_group" "azure-nsg" {
+resource "random_id" "random_vm" {
+  byte_length = 2
+}
+
+resource "azurerm_network_security_group" "nsg" {
   name                = var.vm-nsg_name
   location            = var.vm-location
   resource_group_name = var.vm-resource_group_name
@@ -58,13 +62,13 @@ resource "azurerm_network_security_group" "azure-nsg" {
 }
 
 
-resource "azurerm_subnet_network_security_group_association" "azure-nsg_association" {
+resource "azurerm_subnet_network_security_group_association" "nsg_association" {
   subnet_id                 = var.vm-subnet_id
-  network_security_group_id = azurerm_network_security_group.azure-nsg.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
 
-resource "azurerm_public_ip" "azure-public_ip-1" {
+resource "azurerm_public_ip" "public_ip-1" {
   name                         = var.vm-public_ip_1_name
   location                     = var.vm-location
   resource_group_name          = var.vm-resource_group_name
@@ -78,7 +82,7 @@ tags = {
 }
 
 
-resource "azurerm_network_interface" "azure-net_int-1" {
+resource "azurerm_network_interface" "net_int-1" {
   name                = var.vm-net_int-1
   location            = var.vm-location
   resource_group_name = var.vm-resource_group_name
@@ -91,7 +95,7 @@ resource "azurerm_network_interface" "azure-net_int-1" {
     # private_ip_address_allocation = "Static"
     # private_ip_address            = "10.10.1.122"
         
-    public_ip_address_id          = azurerm_public_ip.azure-public_ip-1.id
+    public_ip_address_id          = azurerm_public_ip.public_ip-1.id
   }
 
   tags = {
@@ -100,31 +104,25 @@ resource "azurerm_network_interface" "azure-net_int-1" {
   }
 }
 
-/*
-resource "azurerm_marketplace_agreement" "azure_marketplace-ubuntu" {
-  for_each  = var.vm-webserver
-  publisher = var.vm-virtual_machine_1_source_image_publisher
-  offer     = var.vm-virtual_machine_1_source_image_offer
-  plan      = var.vm-virtual_machine_1_source_image_sku
-}
-*/
 
 resource "azurerm_marketplace_agreement" "azure_marketplace-ubuntu" {
   for_each  = var.vm-webserver
-  publisher = each.value["image_publisher"]
-  offer     = each.value["image_offer"]
-  plan      = each.value["image_sku"]
+  publisher = each.value["publisher"]
+  offer     = each.value["offer"]
+  plan      = each.value["sku"]
 }
 
-resource "azurerm_linux_virtual_machine" "azure-linux_virtual_machine-1" {
+
+resource "azurerm_linux_virtual_machine" "webserver" {
   name                            = var.vm-webserver_name
   for_each                        = var.vm-webserver
+  #name                            = "${each.value["name"]}-${lower(random_id.random-vm.hex)}"
   resource_group_name             = var.vm-resource_group_name
   location                        = var.vm-location
   size                            = each.value["size"]
-  depends_on                      = [azurerm_marketplace_agreement.azure_marketplace-ubuntu, azurerm_network_interface.azure-net_int-1]
+  depends_on                      = [azurerm_marketplace_agreement.azure_marketplace-ubuntu, azurerm_network_interface.net_int-1]
     
-  network_interface_ids           = [azurerm_network_interface.azure-net_int-1.id]
+  network_interface_ids           = [azurerm_network_interface.net_int-1.id]
   computer_name                   = each.value["computer_name"]
   admin_username                  = each.value["admin_username"]
   admin_password                  = each.value["admin_password"]
@@ -160,16 +158,16 @@ resource "azurerm_linux_virtual_machine" "azure-linux_virtual_machine-1" {
   #}
 
   admin_ssh_key {
-    username                    = var.vm-virtual_machine_1_admin_user_name
+    username                    = each.value["admin_username"]
     public_key                  = file(each.value["public_key"])
   }
 
   boot_diagnostics {
-    storage_account_uri         = var.vm-virtual_machine_1_boot_diagnostic_uri
+    storage_account_uri         = var.vm-webserver-boot_diag_uri
   }
 
   identity {
-    type                        = "SystemAssigned"
+    type                        = each.value["identity_type"]
   }
 
   tags = {
@@ -177,67 +175,3 @@ resource "azurerm_linux_virtual_machine" "azure-linux_virtual_machine-1" {
     "Environment"               = var.vm-tag_environment
   }
 }
-
-
-/*
-resource "azurerm_linux_virtual_machine" "azure-linux_virtual_machine-1" {
-  name                = var.vm-virtual_machine_1_name
-  resource_group_name = var.vm-resource_group_name
-  location            = var.vm-location
-  size                = var.vm-virtual_machine_1_size
-  depends_on          = [azurerm_marketplace_agreement.azure_marketplace-ubuntu, azurerm_network_interface.azure-net_int-1]
-    
-  network_interface_ids           = [azurerm_network_interface.azure-net_int-1.id]
-  computer_name                   = var.vm-virtual_machine_1_computer_name
-  admin_username                  = var.vm-virtual_machine_1_admin_user_name
-  admin_password                  = var.vm-virtual_machine_1_admin_user_password
-  disable_password_authentication = false
-
-  os_disk {
-    name                 = "OSDisk"
-    caching              = "ReadWrite"
-    storage_account_type = var.vm-virtual_machine_1_storage_account_type
-  }
-
-  source_image_reference {
-    publisher = var.vm-virtual_machine_1_source_image_publisher
-    offer     = var.vm-virtual_machine_1_source_image_offer
-    sku       = var.vm-virtual_machine_1_source_image_sku
-    version   = var.vm-virtual_machine_1_source_image_version
-  }
-
-
-# Note: non-Microsoft images require the plan block,
-#       whereas Microsoft Published images do not require a plan block.
-#       If the 'plan' block is present it causes the following error:
-#
-#          Message="User failed validation to purchase resources.
-#                   Error message: 'Offer with PublisherId: 'canonical', OfferId: '0001-com-ubuntu-server-lunar' cannot be purchased due to validation errors.
-#                   For more information see details. Correlation Id: '...' The Offer: '0001-com-ubuntu-server-lunar' cannot be purchased by subscription: '...'
-#                   as it is not to be sold in market: 'GB'. Please choose a subscription which is associated with a different market. 
-
-  #plan {
-  #  name      = var.vm-virtual_machine_1_plan_name
-  #  product   = var.vm-virtual_machine_1_plan_product
-  #  publisher = var.vm-virtual_machine_1_plan_publisher
-  #}
-
-  admin_ssh_key {
-    username   = var.vm-virtual_machine_1_admin_user_name
-    public_key = file(var.vm-virtual_machine_1_public_key)
-  }
-
-  boot_diagnostics {
-    storage_account_uri = var.vm-virtual_machine_1_boot_diagnostic_uri
-  }
-
-  identity {
-    type = "SystemAssigned"
-  }
-
-  tags = {
-    "ResourceType" = "Virtual Machine"
-    "Environment"  = var.vm-tag_environment
-  }
-}
-*/
