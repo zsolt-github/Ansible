@@ -149,6 +149,15 @@ variable "aad_groups" {
   type = list
 }
 
+variable "aad_users_to_create" {
+  type = map(any)
+}
+
+variable "aad_groups_to_create" {
+  type = list
+}
+
+
 # ===========================================================
 # ==========      VARIABLES for the VM MODULE      ==========
 # ===========================================================
@@ -182,75 +191,7 @@ variable "webserver" {
     description = "Webserver Linux VM."
 }
 
-/*
-variable "virtual_machine_1_size" {
-    type        = string
-    description = "Name of Virtual Machine 1."
-}
 
-variable "virtual_machine_1_computer_name" {
-    type        = string
-    description = "Computer Name of Virtual Machine 1."
-}
-
-variable "virtual_machine_1_admin_user_name" {
-    type        = string
-    description = "Name of the admin user for Virtual Machine 1."
-}
-
-variable "virtual_machine_1_admin_user_password" {
-    type        = string
-    description = "Password of the admin user for Virtual Machine 1."
-    sensitive   = true
-}
-
-variable "virtual_machine_1_storage_account_type" {
-    type        = string
-    description = "Storage account type for Virtual Machine 1. (Standard_LRS, StandardSSD_LRS, Premium_LRS, StandardSSD_ZRS and Premium_ZRS)"
-}
-
-variable "virtual_machine_1_source_image_publisher" {
-    type        = string
-    description = "Azure Marketplace VM Publisher"
-}
-
-variable "virtual_machine_1_source_image_offer" {
-    type        = string
-    description = "Azure Marketplace VM Offer"
-}
-
-variable "virtual_machine_1_source_image_sku" {
-    type        = string
-    description = "Azure Marketplace VM SKU"
-}
-
-variable "virtual_machine_1_source_image_version" {
-    type        = string
-    description = "Azure Marketplace VM version"
-}
-/*
-variable "virtual_machine_1_plan_name" {
-    type        = string
-    description = "Azure Marketplace VM Plan Name"
-}
-
-variable "virtual_machine_1_plan_product" {
-    type        = string
-    description = "Azure Marketplace VM Plan Product"
-}
-
-variable "virtual_machine_1_plan_publisher" {
-    type        = string
-    description = "Azure Marketplace VM Plan Publisher"
-}
-
-
-
-
-variable "virtual_machine_1_public_key" {
-    type        = string
-    description = "Location of the Linux VM SSH public key."
-}
 
 
 # ==============================================================================
@@ -277,4 +218,3 @@ variable "acme_email_address" {
     description = "Email address for the Let's Encrypt registration."
 }
 
-*/

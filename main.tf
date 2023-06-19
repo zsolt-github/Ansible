@@ -11,24 +11,27 @@ resource "random_id" "random_id" {
 }
 
 
-# ---- Base Infrasturcture module ----------------------------
+# ==================================================
+# ====      (B)ase (I)nfrastructure module      ====
+# ==================================================
+
 module "bi" {
-  source = "./bi"
+  source                           = "./bi"
 
-  bi-tag_environment = var.tag_environment
-  bi-tag_project     = var.tag_project
+  bi-tag_environment               = var.tag_environment
+  bi-tag_project                   = var.tag_project
 
-  bi-location            = var.location
-  bi-resource_group_name = "${local.name}-RG"
+  bi-location                      = var.location
+  bi-resource_group_name           = "${local.name}-RG"
 
   bi-virtual_network_name          = "${local.name}-VNET"
   bi-virtual_network_address_space = var.vnet_address_space
 
-  bi-subnets = var.subnets
+  bi-subnets                       = var.subnets
 
-  bi-storage_accounts = var.storage_accounts
+  bi-storage_accounts              = var.storage_accounts
 
-  bi-storage_containers = var.storage_containers
+  bi-storage_containers            = var.storage_containers
 
   
   /* ---
@@ -52,92 +55,79 @@ module "bi" {
 
 
 
-# ---- Role Based Access Control module ----------------------------
-module "rbac" {
-  source = "./rbac"
+# ============================================================
+# ====      (R)ole (B)ased (A)ccess (C)ontrol module      ====
+# ============================================================
 
-  depends_on  = [module.bi]
+module "rbac" {
+  source                        = "./rbac"
+
+  depends_on                    = [module.bi]
 
   rbac_terraform_mgt_group_name = var.aad_terraform_mgt_group_name
 
-  rbac_terraform_sub_id = var.aad_terraform_sub_id
+  rbac_terraform_sub_id         = var.aad_terraform_sub_id
 
-  rbac_users  = var.aad_users
-  rbac_sps    = var.aad_sps
-  rbac_groups = var.aad_groups
+  rbac_users                    = var.aad_users
+  rbac_sps                      = var.aad_sps
+  rbac_groups                   = var.aad_groups
 
+  rbac_aad_users_to_create      = var.aad_users_to_create
+  rbac_aad_groups_to_create     = var.aad_groups_to_create
 
 }
 
 
 
-# ---- Virtual mahcine module ----------------------------
+# ==============================================
+# ====      (V)irtual (M)achine module      ====
+# ==============================================
+
 module "vm" {
-  source = "./vm"
+  source                     = "./vm"
 
-  depends_on               = [module.rbac]
+  depends_on                 = [module.bi]
 
-  vm-tag_environment = var.tag_environment
-  vm-tag_project     = var.tag_project
+  vm-tag_environment         = var.tag_environment
+  vm-tag_project             = var.tag_project
 
-  vm-location            = var.location
-  vm-resource_group_name = module.bi.resource_group_name
+  vm-location                = var.location
+  vm-resource_group_name     = module.bi.bi-resource_group_name
 
-  vm-nsg_name = "${local.name}-NSG1"
+  vm-nsg_name                = "${local.name}-NSG1"
 
-  vm-public_ip_1_name = "${local.name}-PUB_IP1"
-  vm-public_ip_1_type = var.public_ip_1_type
-  vm-public_ip_1_sku  = var.public_ip_1_sku
+  vm-public_ip_1_name        = "${local.name}-PUB_IP1"
+  vm-public_ip_1_type        = var.public_ip_1_type
+  vm-public_ip_1_sku         = var.public_ip_1_sku
 
-  vm-net_int-1 = "${local.name}-NET_INT1"
-  vm-subnet_id = module.bi.subnet_1_id
+  vm-net_int-1               = "${local.name}-NET_INT1"
+  vm-subnet_id               = module.bi.bi-subnet_ids["subnet_1"]
 
-  vm-webserver_name = "${local.name}-VM"
-  vm-webserver      = var.webserver
-
-
-
-  /*
-  vm-virtual_machine_1_name           = "${local.name}-VM"
-  vm-virtual_machine_1_size                 = var.virtual_machine_1_size
-  vm-virtual_machine_1_computer_name  = var.virtual_machine_1_computer_name
-  vm-virtual_machine_1_admin_user_name      = var.virtual_machine_1_admin_user_name
-  vm-virtual_machine_1_admin_user_password  = var.virtual_machine_1_admin_user_password
-  vm-virtual_machine_1_storage_account_type = var.virtual_machine_1_storage_account_type
-
-  vm-virtual_machine_1_source_image_publisher = var.virtual_machine_1_source_image_publisher
-  vm-virtual_machine_1_source_image_offer     = var.virtual_machine_1_source_image_offer
-  vm-virtual_machine_1_source_image_sku       = var.virtual_machine_1_source_image_sku
-  vm-virtual_machine_1_source_image_version   = var.virtual_machine_1_source_image_version
-
-  #vm-virtual_machine_1_plan_name              = var.virtual_machine_1_plan_name
-  #vm-virtual_machine_1_plan_product           = var.virtual_machine_1_plan_product
-  #vm-virtual_machine_1_plan_publisher         = var.virtual_machine_1_plan_publisher
-
-  vm-virtual_machine_1_public_key               = var.virtual_machine_1_public_key
-  vm-virtual_machine_1_boot_diagnostic_uri      = module.bi.storage_account_boot_diagnostic_uri
-  */
+  vm-webserver_name          = "${local.name}-VM"
+  vm-webserver               = var.webserver
+  vm-webserver-boot_diag_uri = module.bi.bi-storage_account_boot_diagnostic_uris["sa_1"]
 }
 
-/*
+
+
 # =======================================================
 # ====      (D)NS, (S)SL, (C)ertificates module      ====
 # =======================================================
 
 module "dsc" {
-  source = "./dsc"
+  source                       = "./dsc"
 
   depends_on                   = [module.vm]
 
-  dsc-storage_account_name     = module.bi.az-storage_account_name
-  dsc-container_1_name         = module.bi.az-container_1_name
+  dsc-storage_account_name     = module.bi.bi-storage_account_names["sa_2"]
+  dsc-container_1_name         = module.bi.bi-storage_container_names["container_1"]
+  dsc-container_2_name         = module.bi.bi-storage_container_names["container_2"]
 
   dsc-cloudflare_zone_id       = var.cf-zone_id
   dsc-cloudflare_a_record_name = var.cf-a_record_name
-  dsc-cloudflare_public_ip     = module.vm.public_ip
+  dsc-cloudflare_public_ip     = module.vm.vm-public_ip
 
   dsc-acme_email_address       = var.acme_email_address
 
 }
 
-*/

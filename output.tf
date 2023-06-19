@@ -22,6 +22,10 @@ output "subnet_names" {
   value = module.bi.bi-subnet_names
 }
 
+#output "subnet_names2" {
+#  value = module.bi.bi-subnet_names2
+#}
+
 output "storage_account_names"{
   value = module.bi.bi-storage_account_names
 }
@@ -47,7 +51,6 @@ output "bastion_public_ip"{
 # ===========      OUTPUT from the VM MODULE      ===========
 # ===========================================================
 
-/*
 output "nsg_name" {
   value = module.vm.vm-nsg_name
 }
@@ -73,4 +76,3 @@ output "virtual_machine_public_ip" {
 output "webserver_hostname" {
   value = module.dsc.dsc-webserver_dns_name
 }
-*/

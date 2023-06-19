@@ -69,6 +69,16 @@ storage_accounts = {
     tls         = "TLS1_1"
     nested_pub  = "true"
   }
+  sa_3 = {
+    name        = "sa3"
+    tier        = "Standard"
+    kind        = "StorageV2"
+    rep_type    = "LRS"
+    https       = "true"
+    access_tier = "Cool"
+    tls         = "TLS1_1"
+    nested_pub  = "true"
+  }
 }
 
 
@@ -76,18 +86,18 @@ storage_accounts = {
 storage_containers = {
   container_1 = {
     name            = "certs"        # 3-63 characters, lower case letters, numbers and dash (-)
-    access_type     = "container"    # blob, container, private
-    storage_account = "sa_1"
+    access_type     = "private"    # blob, container, private
+    storage_account = "sa_2"
   }
   container_2 = {
-    name            = "temp"
-    access_type     = "blob"
-    storage_account = "sa_1"
+    name            = "files"
+    access_type     = "container"
+    storage_account = "sa_2"
   }
   container_3 = {
     name            = "corp-files"
-    access_type     = "private"
-    storage_account = "sa_2"
+    access_type     = "blob"
+    storage_account = "sa_3"
   }
 }
 
@@ -135,6 +145,37 @@ aad_groups = [
   "sg-storage-rw",
 ]
 
+aad_users_to_create = {
+  test3 = {
+    user_principal_name         = "Test3@zfcloudoutlook.onmicrosoft.com"
+    display_name                = "Test User 3"
+    password                    = "VerySecretPassw0rd"
+    account_enabled             = true
+    force_password_change       = false
+    disable_password_expiration = true
+    country                     = "UK"
+    department                  = "IT"
+    job_title                   = "System Administrator"
+  },
+  test4 = {
+    user_principal_name         = "Test4@zfcloudoutlook.onmicrosoft.com"
+    display_name                = "Test User 4"
+    password                    = "AnotherSecretPassw0rd"
+    account_enabled             = true
+    force_password_change       = false
+    disable_password_expiration = true
+    country                     = "UK"
+    department                  = "Sales"
+    job_title                   = "Team Leader"
+  }
+}
+
+aad_groups_to_create = [
+  "sg-storage-rw-1",
+  "sg-storage-rw-2",
+  "sg-storage-rw-3"
+]
+
 
 # ===========================================================
 # ==========      VARIABLES for the VM MODULE      ==========
@@ -155,7 +196,7 @@ public_ip_1_sku  = "Basic"
 
 
 # --- Azure Virtual Machines variable -------------------------
-vm-webserver = {
+webserver = {
   webserver-1 = {
     name                            = "webserver"
     size                            = "Standard_B1s" # Standard_B1s / Standard_B2s
@@ -173,29 +214,13 @@ vm-webserver = {
     sku                             = "23_04" # this is the Plan Name as well
     version                         = "latest"
 
-    public_key                      = "~/.ssh/az-webserver_ssh_key.pub"
+    public_key                      = "./az-webserver_ssh_key.pub"
+    #public_key                      = "~/.ssh/az-webserver_ssh_key.pub"
+
+    identity_type                   = "SystemAssigned"
   }
 }
 
-/*
-virtual_machine_1_computer_name        = "Ansible-TF"
-virtual_machine_1_size                 = "Standard_B2s"
-virtual_machine_1_admin_user_name      = "adminuser"
-virtual_machine_1_admin_user_password  = "AdminPassword-2022"
-virtual_machine_1_storage_account_type = "StandardSSD_LRS"
-
-
-# --- Azure Marketplace Virtual Machines variables -------------------------
-virtual_machine_1_source_image_publisher = "canonical"
-virtual_machine_1_source_image_offer     = "0001-com-ubuntu-server-lunar"
-virtual_machine_1_source_image_sku       = "23_04"
-virtual_machine_1_source_image_version   = "latest"
-
-#virtual_machine_1_plan_name              = "23_04"
-#virtual_machine_1_plan_product           = "0001-com-ubuntu-server-lunar"
-#virtual_machine_1_plan_publisher         = "canonical"
-
-virtual_machine_1_public_key              = "~/.ssh/az-webserver_ssh_key.pub"
 
 
 # =============================================================================
@@ -210,5 +235,4 @@ cf-a_record_name = "webserver"
 
 # --- Let's Encrypt variables -------------------------
 acme_email_address = "myemail@mailbox.org"
-*/
 
