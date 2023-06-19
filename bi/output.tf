@@ -17,12 +17,21 @@ output "bi-subnet_ids" {
     description = "Lists of the subnet ID's."
 }
 
+
 output "bi-subnet_names" {
     value = {
         for n in keys(var.bi-subnets) : n => azurerm_subnet.azure-subnets[n].name
     }
     description = "Lists of the subnet ID's."
 }
+
+/*
+# To generate only a list of the subnet names
+output "bi-subnet_names2" {
+    value = values(azurerm_subnet.azure-subnets)[*].name
+    description = "Lists of the subnet ID's."
+}
+*/
 
 output "bi-storage_account_names" {
     value = {

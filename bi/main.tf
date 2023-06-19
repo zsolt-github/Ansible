@@ -64,7 +64,6 @@ resource "azurerm_storage_container" "azure-storage_conainers" {
   for_each              = var.bi-storage_containers
   name                  = each.value["name"]
   container_access_type = each.value["access_type"]
-  #storage_account_name  = azurerm_storage_account.storage_accounts["sa_1"].name
   storage_account_name  = azurerm_storage_account.storage_accounts[each.value["storage_account"]].name
 }
 
