@@ -28,7 +28,7 @@ data "azuread_user" "rbac-users" {
 }
 
 # Security group sg-storage-modify
-data "azuread_group" "sg-storage-rw" {
+data "azuread_group" "rbac-existing-groups" {
   for_each         = toset(var.rbac_groups)
   display_name     = format("%s", each.key)
   security_enabled = true
